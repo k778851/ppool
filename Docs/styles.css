@@ -1,0 +1,80 @@
+/* ─────────────────────────────────────────────────────
+   PPOOL — Design Tokens
+   ───────────────────────────────────────────────────── */
+:root {
+  /* Brand palette — inspired by vivid royal blue reference */
+  --blue-hero: #1A38F5;       /* royal blue, hero only */
+  --blue-hero-deep: #0A1EC7;
+  --mint: #7EF0E4;             /* main accent */
+  --mint-ink: #06B5A4;         /* readable mint for text on light */
+  --mint-deep: #12D6C0;
+
+  /* Role colors (기획) */
+  --driver: #FF8A3D;           /* 운전자 - 주황 */
+  --driver-soft: #FFEEDD;
+  --driver-ink: #D45500;
+
+  --rider: #2B6BFF;            /* 탑승자 - 파랑 */
+  --rider-soft: #E5EDFF;
+  --rider-ink: #1A4BD9;
+
+  --warn: #FF4A4A;             /* 경고 */
+  --warn-soft: #FFE5E5;
+
+  /* Neutrals — warm-cool neutral */
+  --ink-100: #0B1020;
+  --ink-80: #2C334A;
+  --ink-60: #5A6174;
+  --ink-40: #9AA0B0;
+  --ink-20: #D6D9E0;
+  --ink-10: #ECEEF3;
+  --ink-5: #F5F6F9;
+  --white: #FFFFFF;
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: var(--ink-100);
+  background: #EEF0F5;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+}
+
+body {
+  min-height: 100vh;
+}
+
+/* Hand-drawn display font for hero accents */
+.hand {
+  font-family: 'Gaegu', 'Pretendard', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+/* Scrollbar hide for in-frame scroll areas */
+.noscroll::-webkit-scrollbar { display: none; }
+.noscroll { scrollbar-width: none; }
+
+/* Utility text */
+.t-mono { font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace; }
+
+/* Tap feedback */
+.tap { cursor: pointer; transition: transform .08s ease, filter .15s ease; user-select: none; }
+.tap:active { transform: scale(0.97); filter: brightness(0.96); }
+
+/* Card */
+.card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--ink-10);
+}

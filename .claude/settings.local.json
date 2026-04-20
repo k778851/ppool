@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create *)",
+      "Bash(npx create-vite@latest . --template react-ts --overwrite)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "mcp__Claude_Preview__preview_start",
+      "WebFetch(domain:api.anthropic.com)",
+      "Bash(node -e \"const zlib=require\\('zlib'\\),fs=require\\('fs'\\); const buf=fs.readFileSync\\('webfetch-1776700940981-9z80dg.bin'\\); zlib.gunzip\\(buf,\\(err,out\\)=>{ if\\(err\\){console.log\\('not gzip:',err.message\\); const txt=buf.toString\\('utf8',0,2000\\); console.log\\(txt\\);} else { fs.writeFileSync\\('design.html',out\\); console.log\\('extracted, size:',out.length\\); console.log\\(out.toString\\('utf8',0,500\\)\\);}}\\)\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\k7788\\\\.claude\\\\projects\\\\C--Code-ppool\\\\42c42b85-ec3a-4518-aced-86f78fa02988\\\\tool-results\\\\design-extract\")",
+      "Bash(node -e ' *)",
+      "Bash(npx tsc *)",
+      "Bash(node -e \"console.log\\('node ok'\\)\")",
+      "Bash(npx --yes puppeteer --version)",
+      "Bash(awk '{print $5, $9}')",
+      "Bash(gh auth *)",
+      "Bash(gh api *)",
+      "Bash(git --version)",
+      "Bash(git config *)",
+      "PowerShell(gh --version 2>&1)",
+      "PowerShell(git credential-manager --version 2>&1)"
+    ]
+  }
+}
