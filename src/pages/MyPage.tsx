@@ -125,8 +125,18 @@ export function MyPage() {
 
           <span className="my-approved-badge">✓ 승인 완료</span>
           <div className="hand my-profile-name">{MOCK_USER.name}</div>
-          <div className="my-profile-sub">
-            {MOCK_USER.department} · {MOCK_USER.phone.replace(/(\d{3})-(\d{4})-(\d{4})/, '$1-****-$3')}
+          <div className="my-profile-sub" style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <span>{MOCK_USER.department}</span>
+            {MOCK_USER.gender && (
+              <span style={{
+                fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 999,
+                background: MOCK_USER.gender === 'F' ? 'rgba(255,228,239,0.9)' : 'rgba(228,238,255,0.9)',
+                color: MOCK_USER.gender === 'F' ? '#C0185A' : '#1A38F5',
+              }}>
+                {MOCK_USER.gender === 'F' ? '여성' : '남성'}
+              </span>
+            )}
+            <span>{MOCK_USER.phone.replace(/(\d{3})-(\d{4})-(\d{4})/, '$1-****-$3')}</span>
           </div>
 
           <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>

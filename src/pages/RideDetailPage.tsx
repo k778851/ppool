@@ -158,6 +158,15 @@ export function RideDetailPage() {
               <div style={{ fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
                 {driver?.name}
                 <span className="post-badge post-badge--mint" style={{ fontSize: 10.5 }}>인증</span>
+                {driver?.gender && (
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999,
+                    background: driver.gender === 'F' ? '#FFE4EF' : '#E4EEFF',
+                    color: driver.gender === 'F' ? '#C0185A' : '#1A38F5',
+                  }}>
+                    {driver.gender === 'F' ? '여성' : '남성'}
+                  </span>
+                )}
               </div>
               <div style={{ fontSize: 12, color: 'var(--ink-60)', marginTop: 2 }}>
                 {driver?.department} · 운행 {isMyRide ? '직접 등록' : '다수 회'}
@@ -185,7 +194,18 @@ export function RideDetailPage() {
                       {req.passenger?.name?.charAt(0)}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700 }}>{req.passenger?.name}</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 5 }}>
+                        {req.passenger?.name}
+                        {req.passenger?.gender && (
+                          <span style={{
+                            fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 999,
+                            background: req.passenger.gender === 'F' ? '#FFE4EF' : '#E4EEFF',
+                            color: req.passenger.gender === 'F' ? '#C0185A' : '#1A38F5',
+                          }}>
+                            {req.passenger.gender === 'F' ? '여' : '남'}
+                          </span>
+                        )}
+                      </div>
                       <div style={{ fontSize: 11.5, color: 'var(--ink-60)' }}>
                         {req.passenger?.department} · {req.pickup_location}
                       </div>

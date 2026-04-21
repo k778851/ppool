@@ -81,7 +81,18 @@ export function RideCard({ ride, isMyRide = false, myRequestStatus = null }: Pro
             </div>
             <div>
               <div className="post-user-name">{ride.driver?.name}</div>
-              <div className="post-user-dept">{ride.driver?.department}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                <span className="post-user-dept">{ride.driver?.department}</span>
+                {ride.driver?.gender && (
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 999,
+                    background: ride.driver.gender === 'F' ? '#FFE4EF' : '#E4EEFF',
+                    color: ride.driver.gender === 'F' ? '#C0185A' : '#1A38F5',
+                  }}>
+                    {ride.driver.gender === 'F' ? '여' : '남'}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
