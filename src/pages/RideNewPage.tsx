@@ -2,15 +2,12 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BottomNav } from '../components/layout/BottomNav'
 
-type TripType = 'oneway' | 'regular' | 'roundtrip'
-
 interface FormState {
   origin: string
   destination: string
   date: string
   time: string
   seats: number
-  tripType: TripType
   notice: string
 }
 
@@ -78,7 +75,6 @@ export function RideNewPage() {
     date: defaultDate,
     time: defaultTime,
     seats: 3,
-    tripType: 'oneway',
     notice: '',
   })
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
@@ -102,10 +98,6 @@ export function RideNewPage() {
     if (!validate()) return
     alert('게시글 등록 완료!\n(DB 연결 후 실제 저장 예정)')
     navigate('/')
-  }
-
-  const tripLabels: Record<TripType, string> = {
-    oneway: '편도', regular: '정기 반복', roundtrip: '왕복',
   }
 
   return (
@@ -165,23 +157,6 @@ export function RideNewPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <InputCell label="날짜" type="date" value={form.date} onChange={v => set('date', v)} />
             <InputCell label="시간" type="time" value={form.time} onChange={v => set('time', v)} />
-          </div>
-          <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
-            {(['oneway', 'regular', 'roundtrip'] as TripType[]).map(t => (
-              <button
-                key={t}
-                className="tap"
-                onClick={() => set('tripType', t)}
-                style={{
-                  padding: '6px 14px', borderRadius: 999,
-                  background: form.tripType === t ? 'var(--ink-100)' : 'var(--ink-5)',
-                  color: form.tripType === t ? '#fff' : 'var(--ink-60)',
-                  fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer',
-                }}
-              >
-                {tripLabels[t]}
-              </button>
-            ))}
           </div>
         </section>
 
