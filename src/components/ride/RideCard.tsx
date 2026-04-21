@@ -13,8 +13,6 @@ export function RideCard({ ride, isMyRide = false, myRequestStatus = null }: Pro
   const isFull = ride.status === 'FULL' || ride.current_seats >= ride.max_seats
   const remaining = ride.max_seats - ride.current_seats
   const accentColor = isMyRide ? 'var(--blue-hero)' : 'var(--driver)'
-  const softColor = isMyRide ? 'var(--rider-soft)' : 'var(--driver-soft)'
-  const inkColor = isMyRide ? 'var(--rider-ink)' : 'var(--driver-ink)'
   const avatarBg = ride.driver?.gender === 'F' ? 'var(--rider-soft)' : 'var(--driver-soft)'
 
   return (
@@ -52,16 +50,53 @@ export function RideCard({ ride, isMyRide = false, myRequestStatus = null }: Pro
           </div>
         </div>
 
-        {/* 경로 */}
-        <div className="post-route">
-          <div className="post-route-line">
-            <div className="post-route-dot" />
-            <div className="post-route-connector" />
-            <div className="post-route-diamond" style={{ background: accentColor }} />
+        {/* 경로 + 신청 버튼 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="post-route" style={{ flex: 1 }}>
+            <div className="post-route-line">
+              <div className="post-route-dot" />
+              <div className="post-route-connector" />
+              <div className="post-route-diamond" style={{ background: accentColor }} />
+            </div>
+            <div className="post-route-text">
+              <div className="post-route-from">{ride.origin}</div>
+              <div className="post-route-to">{ride.destination}</div>
+            </div>
           </div>
-          <div className="post-route-text">
-            <div className="post-route-from">{ride.origin}</div>
-            <div className="post-route-to">{ride.destination}</div>
+
+          {/* 신청 버튼 */}
+          <div onClick={e => { e.stopPropagation(); navigate(`/rides/${ride.id}`) }}>
+            {isMyRide ? (
+              <span style={{
+                fontSize: 11.5, fontWeight: 800, padding: '7px 12px', borderRadius: 10,
+                background: 'var(--rider-soft)', color: 'var(--rider-ink)',
+                whiteSpace: 'nowrap',
+              }}>관리</span>
+            ) : myRequestStatus === 'APPROVED' ? (
+              <span style={{
+                fontSize: 11.5, fontWeight: 800, padding: '7px 12px', borderRadius: 10,
+                background: '#DEFAF5', color: 'var(--mint-ink)',
+                whiteSpace: 'nowrap',
+              }}>확정</span>
+            ) : myRequestStatus === 'PENDING' ? (
+              <span style={{
+                fontSize: 11.5, fontWeight: 800, padding: '7px 12px', borderRadius: 10,
+                background: 'var(--ink-10)', color: 'var(--ink-60)',
+                whiteSpace: 'nowrap',
+              }}>대기중</span>
+            ) : isFull ? (
+              <span style={{
+                fontSize: 11.5, fontWeight: 700, padding: '7px 12px', borderRadius: 10,
+                background: 'var(--ink-10)', color: 'var(--ink-40)',
+                whiteSpace: 'nowrap',
+              }}>마감</span>
+            ) : (
+              <span style={{
+                fontSize: 11.5, fontWeight: 800, padding: '7px 14px', borderRadius: 10,
+                background: accentColor, color: '#fff',
+                whiteSpace: 'nowrap',
+              }}>신청</span>
+            )}
           </div>
         </div>
 
@@ -105,12 +140,6 @@ export function RideCard({ ride, isMyRide = false, myRequestStatus = null }: Pro
                 <span style={{ color: 'var(--ink-40)' }}>/{ride.max_seats}석</span>
               </span>
             )}
-            <div
-              className="post-fare-badge"
-              style={{ background: softColor, color: inkColor }}
-            >
-              ₩{(ride.fare_per_person ?? 3000).toLocaleString()}
-            </div>
           </div>
         </div>
       </div>
