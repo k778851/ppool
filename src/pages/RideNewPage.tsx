@@ -185,38 +185,18 @@ export function RideNewPage() {
           </div>
         </section>
 
-        {/* ③ 인원 + 분담금 */}
+        {/* ③ 인원 */}
         <section className="write-section">
           <StepLabel num="3" color="var(--driver)">몇 명 태울 수 있어요?</StepLabel>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {/* 좌석 수 스피너 */}
-            <FieldBox label="탑승 인원">
-              <div className="write-input-wrap write-spinner-wrap">
-                <button className="write-spinner-btn tap"
-                  onClick={() => set('seats', Math.max(1, form.seats - 1))}>−</button>
-                <span className="write-spinner-val">{form.seats} 명</span>
-                <button className="write-spinner-btn tap"
-                  onClick={() => set('seats', Math.min(8, form.seats + 1))}>+</button>
-              </div>
-            </FieldBox>
-
-            {/* 분담금 고정 */}
-            <FieldBox label="분담금">
-              <div className="write-input-wrap" style={{ position: 'relative' }}>
-                <input className="write-input" value="3,000" readOnly
-                  style={{ color: 'var(--ink-60)', cursor: 'not-allowed' }} />
-                <span style={{
-                  position: 'absolute', right: 10,
-                  fontSize: 10.5, fontWeight: 700,
-                  background: '#DEFAF5', color: 'var(--mint-ink)',
-                  padding: '3px 8px', borderRadius: 999,
-                }}>고정</span>
-              </div>
-            </FieldBox>
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--ink-60)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span>ℹ️</span> 분담금은 3,000원 고정이에요 (유류비 분담 · 영리 목적 아님)
-          </div>
+          <FieldBox label="탑승 인원">
+            <div className="write-input-wrap write-spinner-wrap">
+              <button className="write-spinner-btn tap"
+                onClick={() => set('seats', Math.max(1, form.seats - 1))}>−</button>
+              <span className="write-spinner-val">{form.seats} 명</span>
+              <button className="write-spinner-btn tap"
+                onClick={() => set('seats', Math.min(8, form.seats + 1))}>+</button>
+            </div>
+          </FieldBox>
         </section>
 
         {/* ④ 메모 */}
