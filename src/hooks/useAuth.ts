@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
-import { IS_MOCK, MOCK_USER } from '../lib/mock'
+import { useEffect, useState, useCallback } from 'react'
+import { api, IS_MOCK, setToken, clearToken } from '../lib/api'
+import { MOCK_USER } from '../lib/mock'
 import type { User } from '../types'
 
 export function useAuth() {
@@ -10,52 +10,56 @@ export function useAuth() {
   useEffect(() => {
     if (IS_MOCK) return
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        fetchProfile(session.user.id)
-      } else {
-        setLoading(false)
-      }
-    })
+    const token = typeof window !== 'undefined'
+      ? localStorage.getItem('ppool_token')
+      : null
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        fetchProfile(session.user.id)
-      } else {
-        setUser(null)
-        setLoading(false)
-      }
-    })
+    if (!token) {
+      // Use a microtask so setState isn't called synchronously inside the effect body
+      Promise.resolve().then(() => setLoading(false))
+      return
+    }
 
-    return () => subscription.unsubscribe()
+    api.users.me()
+      .then(profile => setUser(profile))
+      .catch(() => { clearToken(); setUser(null) })
+      .finally(() => setLoading(false))
   }, [])
 
-  const fetchProfile = async (authId: string) => {
-    const { data } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', authId)
-      .single()
+  /** 카카오 로그인 페이지로 이동 */
+  const signInWithKakao = useCallback(() => {
+    if (IS_MOCK) {
+      setUser(MOCK_USER)
+      return
+    }
+    const clientId = process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID
+    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback`)
+    window.location.href =
+      `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`
+  }, [])
 
-    setUser(data)
-    setLoading(false)
-  }
+  /** 카카오 콜백에서 호출 — JWT 저장 후 유저 세팅 */
+  const handleCallback = useCallback(async (code: string) => {
+    const { token, user: profile } = await api.auth.kakaoCallback(code)
+    setToken(token)
+    setUser(profile)
+    return profile
+  }, [])
 
-  const signInWithKakao = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'kakao',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    })
-  }
-
-  const signOut = async () => {
-    await supabase.auth.signOut()
+  const signOut = useCallback(() => {
+    clearToken()
     setUser(null)
-  }
+  }, [])
 
-  return { user, loading, signInWithKakao, signOut, refetchProfile: () => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) fetchProfile(data.user.id)
-    })
-  }}
+  const refetchProfile = useCallback(async () => {
+    try {
+      const profile = await api.users.me()
+      setUser(profile)
+    } catch {
+      clearToken()
+      setUser(null)
+    }
+  }, [])
+
+  return { user, loading, signInWithKakao, handleCallback, signOut, refetchProfile }
 }

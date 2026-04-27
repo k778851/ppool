@@ -1,4 +1,5 @@
-import { useNavigate } from 'react-router-dom'
+'use client'
+import { useRouter } from 'next/navigation'
 import { BottomNav } from './BottomNav'
 
 interface Props {
@@ -10,17 +11,17 @@ interface Props {
 }
 
 export function PageLayout({ children, title, showBack = false, hideNav = false, rightSlot }: Props) {
-  const navigate = useNavigate()
+  const router = useRouter()
 
   return (
     <div className="page-layout">
       <header className="header">
         {showBack ? (
-          <button className="header-back tap" onClick={() => navigate(-1)}>
+          <button className="header-back tap" onClick={() => router.back()}>
             ← 뒤로
           </button>
         ) : (
-          <button className="header-logo tap" onClick={() => navigate('/')}>
+          <button className="header-logo tap" onClick={() => router.push('/feed')}>
             P플 👍
           </button>
         )}

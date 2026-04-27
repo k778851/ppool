@@ -1,8 +1,8 @@
 import type { User, Ride, RideRequest, Vehicle } from '../types'
 
 export const IS_MOCK =
-  !import.meta.env.VITE_SUPABASE_URL ||
-  import.meta.env.VITE_SUPABASE_URL === 'your_supabase_url'
+  !process.env.NEXT_PUBLIC_API_URL ||
+  process.env.NEXT_PUBLIC_API_URL === 'http://localhost:8080'
 
 // ── 현재 로그인 유저 (나) ──────────────────────────────────
 export const MOCK_USER: User = {

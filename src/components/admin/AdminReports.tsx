@@ -1,32 +1,42 @@
-import { useEffect, useState } from 'react'
-import { supabase } from '../../lib/supabase'
-import type { Report } from '../../types'
+'use client'
+import { useEffect, useState, useCallback } from 'react'
 
 const REASON_LABEL: Record<string, string> = {
   NO_SHOW: '노쇼', RUDE: '무례', UNSAFE: '위험운전', FARE: '요금문제', OTHER: '기타',
 }
 
+interface ReportItem {
+  id: string
+  reason: string
+  description?: string
+  created_at: string
+  reporter_name?: string
+  reported_name?: string
+  status: string
+}
+
 export function AdminReports() {
-  const [reports, setReports] = useState<(Report & { reporter?: { name: string }; reported?: { name: string } })[]>([])
+  const [reports, setReports] = useState<ReportItem[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { fetchReports() }, [])
-
-  const fetchReports = async () => {
+  const fetchReports = useCallback(async () => {
     setLoading(true)
-    const { data } = await supabase
-      .from('reports')
-      .select('*, reporter:reporter_id(name), reported:reported_id(name)')
-      .eq('status', 'PENDING')
-      .order('created_at')
-    setReports(data ?? [])
-    setLoading(false)
-  }
+    try {
+      const res = await fetch('/api/admin/reports', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('ppool_token')}` },
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setReports(data)
+      }
+    } catch {
+      // 목업: 빈 배열
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
-  const handle = async (id: string, status: 'REVIEWED' | 'REJECTED') => {
-    await supabase.from('reports').update({ status }).eq('id', id)
-    fetchReports()
-  }
+  useEffect(() => { fetchReports() }, [fetchReports])
 
   if (loading) return <p>불러오는 중...</p>
   if (reports.length === 0) return <p>처리할 신고가 없습니다.</p>
@@ -37,15 +47,11 @@ export function AdminReports() {
       {reports.map(r => (
         <div key={r.id} className="card report-card">
           <div className="report-meta">
-            <span className="badge">{REASON_LABEL[r.reason]}</span>
-            <span>{r.reporter?.name} → {r.reported?.name}</span>
+            <span className="badge">{REASON_LABEL[r.reason] ?? r.reason}</span>
+            <span>{r.reporter_name} → {r.reported_name}</span>
             <span className="text-muted">{new Date(r.created_at).toLocaleDateString('ko-KR')}</span>
           </div>
           {r.description && <p className="report-desc">{r.description}</p>}
-          <div className="report-actions">
-            <button className="btn-sm btn-approve tap" onClick={() => handle(r.id, 'REVIEWED')}>처리 완료</button>
-            <button className="btn-sm btn-ghost tap" onClick={() => handle(r.id, 'REJECTED')}>반려</button>
-          </div>
         </div>
       ))}
     </div>

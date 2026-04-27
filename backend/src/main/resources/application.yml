@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: ppool-backend
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:ppool}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate          # Flyway가 스키마 관리
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${KAKAO_CLIENT_ID}
+            client-secret: ${KAKAO_CLIENT_SECRET}
+            redirect-uri: ${FRONTEND_URL}/auth/callback
+
+server:
+  port: 8080
+
+# JWT 설정
+jwt:
+  secret: ${JWT_SECRET}           # 최소 256비트 이상 랜덤 문자열
+  expiration-ms: 2592000000       # 30일 (ms)
+
+# 카카오 API
+kakao:
+  auth-url: https://kauth.kakao.com
+  api-url: https://kapi.kakao.com
+
+# CORS 허용 출처
+cors:
+  allowed-origins:
+    - http://localhost:3000        # Next.js dev
+    - https://k778851.github.io   # GitHub Pages
+    - ${FRONTEND_URL:}             # 운영 도메인
+
+# 암호화
+encrypt:
+  key: ${ENCRYPT_KEY}             # AES-256용 32바이트 키
+
+logging:
+  level:
+    com.ppool: DEBUG
+    org.hibernate.SQL: DEBUG

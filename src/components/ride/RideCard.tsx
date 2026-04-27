@@ -1,4 +1,6 @@
-import { useNavigate } from 'react-router-dom'
+'use client'
+
+import { useRouter } from 'next/navigation'
 import type { Ride, User, Vehicle } from '../../types'
 import { formatRelativeTime, formatDateTime } from '../../lib/utils'
 
@@ -9,7 +11,7 @@ interface Props {
 }
 
 export function RideCard({ ride, isMyRide = false, myRequestStatus = null }: Props) {
-  const navigate = useNavigate()
+  const router = useRouter()
   const isFull = ride.status === 'FULL' || ride.current_seats >= ride.max_seats
   const remaining = ride.max_seats - ride.current_seats
   const accentColor = isMyRide ? 'var(--blue-hero)' : 'var(--driver)'
@@ -18,7 +20,7 @@ export function RideCard({ ride, isMyRide = false, myRequestStatus = null }: Pro
   return (
     <div
       className="post-card tap"
-      onClick={() => navigate(`/rides/${ride.id}`)}
+      onClick={() => router.push(`/rides/${ride.id}`)}
     >
       {/* 왼쪽 색상 바 */}
       <div className="post-card-accent" style={{ background: accentColor }} />
@@ -65,7 +67,7 @@ export function RideCard({ ride, isMyRide = false, myRequestStatus = null }: Pro
           </div>
 
           {/* 신청 버튼 */}
-          <div onClick={e => { e.stopPropagation(); navigate(`/rides/${ride.id}`) }}>
+          <div onClick={e => { e.stopPropagation(); router.push(`/rides/${ride.id}`) }}>
             {isMyRide ? (
               <span style={{
                 fontSize: 11.5, fontWeight: 800, padding: '7px 12px', borderRadius: 10,

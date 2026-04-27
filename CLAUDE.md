@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Status
 
-Pre-development (planning) phase. No application code exists yet. All spec is in `Docs/PPOOL_MVP_상세명세서.md` and `Docs/PPOOL.md`.
+Active development. Frontend (Next.js 15) and backend (Spring Boot 3) are both in place. Spec in `Docs/PPOOL_MVP_상세명세서.md` and `Docs/PPOOL.md`.
 
 ## Project Overview
 
@@ -12,12 +12,81 @@ Pre-development (planning) phase. No application code exists yet. All spec is in
 
 ## Tech Stack
 
-- **Frontend**: React (PWA 적용 권장), Pretendard 폰트, CSS variables (`src/styles.css`)
-- **Backend/DB**: Supabase (PostgreSQL + Auth + Realtime + RLS)
-- **Auth**: 카카오 OAuth → 관리자 승인 (PENDING → APPROVED/REJECTED)
+- **Frontend**: Next.js 15 App Router, `'use client'` on all interactive components, Pretendard 폰트, CSS variables (`src/styles.css`)
+- **Backend**: Spring Boot 3.3 (Java 17), JPA + PostgreSQL, JWT (jjwt 0.12.5), Flyway migrations
+- **Auth**: 카카오 OAuth → Spring Boot JWT → 관리자 수동 승인 (PENDING → APPROVED/REJECTED)
 - **Maps**: 카카오맵 API
-- **Deployment**: Vercel
+- **Deployment**: GitHub Pages (frontend, `DEPLOY_TARGET=ghpages npm run build`), 백엔드는 별도 서버
 - **Notifications**: Web Push (Service Worker) — 2차
+
+## Commands
+
+```bash
+# Frontend dev
+npm run dev          # http://localhost:3000
+
+# Frontend build
+npm run build        # standard
+DEPLOY_TARGET=ghpages npm run build  # GitHub Pages static export → out/
+
+# Backend dev (requires Java 17, Maven)
+cd backend && mvn spring-boot:run
+
+# Backend build
+cd backend && mvn package -DskipTests
+```
+
+## Frontend Architecture
+
+```
+src/
+  app/                     # Next.js App Router
+    (main)/                # Route group — AuthGuard layout
+      feed/                # 메인 피드
+      rides/[id]/          # 게시글 상세
+      rides/new/           # 게시글 작성
+      my/                  # 마이페이지
+    login/ signup/ pending/ banned/ auth/callback/  # 비인증 라우트
+    admin/                 # 관리자
+    layout.tsx             # root layout (Providers)
+    page.tsx               # / → auth 상태에 따라 redirect
+  components/
+    layout/                # BottomNav, Header, PageLayout, AuthGuard
+    ride/                  # RideCard
+    admin/                 # AdminUsers, AdminRides, AdminReports, AdminBackup
+  hooks/useAuth.ts         # JWT 기반 인증 상태
+  stores/authStore.ts      # AuthContext
+  lib/
+    api.ts                 # Java REST API 클라이언트 (IS_MOCK 패턴)
+    mock.ts                # 목업 데이터
+  types/index.ts           # 공유 타입
+```
+
+**IS_MOCK 패턴**: `NEXT_PUBLIC_API_URL` 미설정 시 목업 모드. 실제 백엔드 연동 시 `.env.local`에 설정.
+
+## Backend Architecture
+
+```
+backend/src/main/java/com/ppool/
+  entity/         User, Vehicle, Ride, RideRequest, Report
+  dto/            AuthDto, UserDto, RideDto, RideRequestDto, VehicleDto
+  repository/     JPA repositories
+  service/        AuthService, UserService, RideService, RideRequestService, AdminService
+  controller/     AuthController, UserController, RideController, RequestController, ReportController, AdminController
+  security/       JwtProvider, JwtAuthFilter, SecurityConfig
+  config/         WebConfig (CORS)
+  exception/      GlobalExceptionHandler
+  util/           EncryptUtil (AES-256)
+backend/src/main/resources/
+  application.yml             # 환경변수 기반 설정
+  db/migration/V1__init.sql   # Flyway 초기 스키마
+```
+
+**환경변수** (`backend`):
+- `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
+- `JWT_SECRET` (256비트+), `ENCRYPT_KEY` (32바이트)
+- `KAKAO_CLIENT_ID`, `KAKAO_CLIENT_SECRET`
+- `FRONTEND_URL`
 
 ## Database Schema
 

@@ -1,27 +1,27 @@
-import { useEffect, useState } from 'react'
-import { supabase } from '../../lib/supabase'
+'use client'
+import { useEffect, useState, useCallback } from 'react'
+import { api } from '../../lib/api'
 import type { Ride } from '../../types'
 
 export function AdminRides() {
-  const [rides, setRides] = useState<(Ride & { driver?: { name: string } })[]>([])
+  const [rides, setRides] = useState<Ride[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { fetchRides() }, [])
-
-  const fetchRides = async () => {
+  const fetchRides = useCallback(async () => {
     setLoading(true)
-    const { data } = await supabase
-      .from('rides')
-      .select('*, driver:driver_id(name)')
-      .in('status', ['OPEN', 'FULL', 'STARTED'])
-      .order('departure_time')
-    setRides(data ?? [])
-    setLoading(false)
-  }
+    try {
+      const data = await api.admin.rides()
+      setRides(data)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
-  const deleteRide = async (id: string) => {
+  useEffect(() => { fetchRides() }, [fetchRides])
+
+  const cancelRide = async (id: string) => {
     if (!confirm('게시글을 삭제하시겠습니까?')) return
-    await supabase.from('rides').update({ status: 'CANCELLED' }).eq('id', id)
+    await api.rides.delete(id)
     fetchRides()
   }
 
@@ -42,9 +42,9 @@ export function AdminRides() {
               <td>{r.destination}</td>
               <td>{new Date(r.departure_time).toLocaleString('ko-KR')}</td>
               <td>{r.driver?.name}</td>
-              <td><span className={`status-badge status-${r.status.toLowerCase()}`}>{r.status}</span></td>
+              <td><span className={`status-badge status-${r.status?.toLowerCase()}`}>{r.status}</span></td>
               <td>
-                <button className="btn-sm btn-reject tap" onClick={() => deleteRide(r.id)}>삭제</button>
+                <button className="btn-sm btn-reject tap" onClick={() => cancelRide(r.id)}>삭제</button>
               </td>
             </tr>
           ))}

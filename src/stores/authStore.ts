@@ -4,9 +4,10 @@ import type { User } from '../types'
 interface AuthContextValue {
   user: User | null
   loading: boolean
-  signInWithKakao: () => Promise<void>
-  signOut: () => Promise<void>
-  refetchProfile: () => void
+  signInWithKakao: () => void
+  handleCallback: (code: string) => Promise<User>
+  signOut: () => void
+  refetchProfile: () => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

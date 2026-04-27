@@ -1,6 +1,6 @@
 import CryptoJS from 'crypto-js'
 
-const SECRET = import.meta.env.VITE_ENCRYPT_KEY as string
+const SECRET = (process.env.NEXT_PUBLIC_ENCRYPT_KEY ?? '') as string
 
 export const encrypt = (text: string): string =>
   CryptoJS.AES.encrypt(text, SECRET).toString()

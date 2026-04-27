@@ -1,22 +1,23 @@
-import { useNavigate } from 'react-router-dom'
+'use client'
+import { useRouter } from 'next/navigation'
 import { useAuthContext } from '../../stores/authStore'
 
 export function Header() {
-  const navigate = useNavigate()
+  const router = useRouter()
   const { user } = useAuthContext()
 
   return (
     <header className="header">
-      <button className="header-logo tap" onClick={() => navigate('/')}>
+      <button className="header-logo tap" onClick={() => router.push('/feed')}>
         P플
       </button>
       <div className="header-actions">
         {user?.is_admin && (
-          <button className="tap" onClick={() => navigate('/admin')} aria-label="관리자">
+          <button className="tap" onClick={() => router.push('/admin')} aria-label="관리자">
             ⚙️
           </button>
         )}
-        <button className="tap" onClick={() => navigate('/my')} aria-label="마이페이지">
+        <button className="tap" onClick={() => router.push('/my')} aria-label="마이페이지">
           👤
         </button>
       </div>

@@ -1,4 +1,6 @@
-import { Navigate, useLocation } from 'react-router-dom'
+'use client'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuthContext } from '../../stores/authStore'
 
 interface Props {
@@ -8,7 +10,16 @@ interface Props {
 
 export function AuthGuard({ children, requireAdmin = false }: Props) {
   const { user, loading } = useAuthContext()
-  const location = useLocation()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (loading) return
+    if (!user) { router.replace('/login'); return }
+    if (user.status === 'PENDING') { router.replace('/pending'); return }
+    if (user.status === 'BANNED') { router.replace('/banned'); return }
+    if (user.status === 'REJECTED') { router.replace('/login'); return }
+    if (requireAdmin && !user.is_admin) { router.replace('/feed'); return }
+  }, [user, loading, requireAdmin, router])
 
   if (loading) {
     return (
@@ -18,15 +29,8 @@ export function AuthGuard({ children, requireAdmin = false }: Props) {
     )
   }
 
-  if (!user) return <Navigate to="/login" state={{ from: location }} replace />
-
-  if (user.status === 'PENDING') return <Navigate to="/pending" replace />
-
-  if (user.status === 'BANNED') return <Navigate to="/banned" replace />
-
-  if (user.status === 'REJECTED') return <Navigate to="/login" replace />
-
-  if (requireAdmin && !user.is_admin) return <Navigate to="/" replace />
+  if (!user || user.status !== 'APPROVED') return null
+  if (requireAdmin && !user.is_admin) return null
 
   return <>{children}</>
 }
