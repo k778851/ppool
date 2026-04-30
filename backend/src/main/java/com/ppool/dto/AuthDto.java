@@ -1,6 +1,5 @@
 package com.ppool.dto;
 
-import com.ppool.entity.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
@@ -8,21 +7,17 @@ import lombok.Data;
 public class AuthDto {
 
     @Data
-    public static class KakaoCallbackRequest {
+    public static class ZauthLoginRequest {
         @NotBlank
-        private String code;
+        private String zauthId;     // 시온로그인 고유번호
+        @NotBlank
+        private String password;
     }
 
     @Data
-    public static class SignupRequest {
-        @NotBlank
-        private String name;
-        @NotBlank
-        private String department;
-        @NotBlank
-        private String phone;
-        @Pattern(regexp = "M|F|N")
-        private String gender;
+    public static class SetupRequest {
+        @NotBlank @Pattern(regexp = "M|F|N")
+        private String gender;      // 시온로그인에 없으므로 최초 로그인 시 직접 입력
     }
 
     @Data

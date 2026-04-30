@@ -12,8 +12,6 @@ export interface User {
   phone: string
   department: string
   gender: Gender
-  account_number?: string
-  account_bank?: string
   is_driver: boolean
   is_admin: boolean
   status: UserStatus

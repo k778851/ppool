@@ -12,8 +12,6 @@ export const MOCK_USER: User = {
   phone: '010-1234-5678',
   department: '청년1부',
   gender: 'M',
-  account_number: 'ENCRYPTED_110-123-456789',
-  account_bank: '카카오뱅크',
   is_driver: true,
   is_admin: false,
   status: 'APPROVED',

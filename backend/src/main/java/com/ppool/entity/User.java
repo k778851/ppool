@@ -16,20 +16,17 @@ public class User {
     private String id;
 
     @Column(unique = true, nullable = false)
-    private String kakaoId;
+    private String zauthId;       // 시온로그인 고유번호
 
     @Column(nullable = false)
     private String name;
 
-    private String phone;        // 부분 암호화 저장
+    private String phone;
     private String department;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 1)
-    private Gender gender;
-
-    private String accountNumber; // AES-256 암호화 저장
-    private String accountBank;
+    private Gender gender;        // 시온로그인에 없으므로 최초 로그인 시 직접 입력
 
     @Column(nullable = false)
     private boolean isDriver = false;

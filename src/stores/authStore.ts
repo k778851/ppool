@@ -4,8 +4,7 @@ import type { User } from '../types'
 interface AuthContextValue {
   user: User | null
   loading: boolean
-  signInWithKakao: () => void
-  handleCallback: (code: string) => Promise<User>
+  signInWithZauth: (zauthId: string, password: string) => Promise<User>
   signOut: () => void
   refetchProfile: () => Promise<void>
 }

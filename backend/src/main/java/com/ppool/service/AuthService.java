@@ -13,43 +13,47 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final KakaoAuthService kakaoAuthService;
+    private final ZauthService zauthService;
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
 
     /**
-     * 카카오 인가코드 → JWT 발급
-     * 신규 사용자면 PENDING 상태로 생성 후 토큰 반환
+     * 시온로그인 → JWT 발급
+     * 신규 사용자면 PENDING 상태로 생성 후 토큰 반환 (성별은 /auth/setup 에서 완성)
      */
     @Transactional
-    public AuthDto.TokenResponse kakaoLogin(String code) {
-        String accessToken = kakaoAuthService.getAccessToken(code);
-        String kakaoId = kakaoAuthService.getKakaoId(accessToken);
+    public AuthDto.TokenResponse zauthLogin(String zauthId, String password) {
+        // 시온로그인 API 호출 → 이름·부서·연락처 수신
+        ZauthService.ZauthUserInfo info = zauthService.verify(zauthId, password);
 
-        User user = userRepository.findByKakaoId(kakaoId).orElseGet(() -> {
-            // 신규 사용자 — 기본 정보만 저장, 나머지는 /auth/signup 에서 완성
-            return userRepository.save(User.builder()
-                    .kakaoId(kakaoId)
-                    .name("신규회원")
+        User user = userRepository.findByZauthId(zauthId).orElseGet(() ->
+            userRepository.save(User.builder()
+                    .zauthId(zauthId)
+                    .name(info.getName())
+                    .department(info.getDepartment())
+                    .phone(info.getPhone())
                     .status(User.UserStatus.PENDING)
-                    .build());
-        });
+                    .build())
+        );
+
+        // 시온로그인에서 받은 정보 최신화
+        user.setName(info.getName());
+        user.setDepartment(info.getDepartment());
+        if (info.getPhone() != null) user.setPhone(info.getPhone());
+        userRepository.save(user);
 
         String token = jwtProvider.generateToken(user.getId());
         return new AuthDto.TokenResponse(token, UserDto.Response.from(user));
     }
 
     /**
-     * 회원가입 정보 제출 (PENDING 사용자가 이름·부서·전화·성별 입력)
+     * 최초 로그인 셋업: 성별 저장 (시온로그인에 없는 정보)
      */
     @Transactional
-    public UserDto.Response signup(User currentUser, AuthDto.SignupRequest req) {
-        if (currentUser.getStatus() != User.UserStatus.PENDING) {
-            throw new IllegalStateException("이미 처리된 회원입니다.");
+    public UserDto.Response setup(User currentUser, AuthDto.SetupRequest req) {
+        if (currentUser.getGender() != null) {
+            // 이미 셋업 완료 — 성별만 재설정은 허용
         }
-        currentUser.setName(req.getName());
-        currentUser.setDepartment(req.getDepartment());
-        currentUser.setPhone(req.getPhone());
         currentUser.setGender(User.Gender.valueOf(req.getGender()));
         return UserDto.Response.from(userRepository.save(currentUser));
     }

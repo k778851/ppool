@@ -15,7 +15,6 @@ export function useAuth() {
       : null
 
     if (!token) {
-      // Use a microtask so setState isn't called synchronously inside the effect body
       Promise.resolve().then(() => setLoading(false))
       return
     }
@@ -26,21 +25,13 @@ export function useAuth() {
       .finally(() => setLoading(false))
   }, [])
 
-  /** 카카오 로그인 페이지로 이동 */
-  const signInWithKakao = useCallback(() => {
+  /** 시온로그인: 고유번호+비밀번호로 JWT 발급 */
+  const signInWithZauth = useCallback(async (zauthId: string, password: string) => {
     if (IS_MOCK) {
       setUser(MOCK_USER)
-      return
+      return MOCK_USER
     }
-    const clientId = process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID
-    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback`)
-    window.location.href =
-      `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`
-  }, [])
-
-  /** 카카오 콜백에서 호출 — JWT 저장 후 유저 세팅 */
-  const handleCallback = useCallback(async (code: string) => {
-    const { token, user: profile } = await api.auth.kakaoCallback(code)
+    const { token, user: profile } = await api.auth.zauthLogin(zauthId, password)
     setToken(token)
     setUser(profile)
     return profile
@@ -61,5 +52,5 @@ export function useAuth() {
     }
   }, [])
 
-  return { user, loading, signInWithKakao, handleCallback, signOut, refetchProfile }
+  return { user, loading, signInWithZauth, signOut, refetchProfile }
 }

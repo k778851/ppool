@@ -16,18 +16,18 @@ public class AuthController {
 
     private final AuthService authService;
 
-    /** POST /api/auth/kakao — 카카오 인가코드로 JWT 발급 */
-    @PostMapping("/kakao")
-    public ResponseEntity<AuthDto.TokenResponse> kakaoLogin(
-            @Valid @RequestBody AuthDto.KakaoCallbackRequest req) {
-        return ResponseEntity.ok(authService.kakaoLogin(req.getCode()));
+    /** POST /api/auth/zauth — 시온로그인 고유번호+비밀번호 → JWT 발급 */
+    @PostMapping("/zauth")
+    public ResponseEntity<AuthDto.TokenResponse> zauthLogin(
+            @Valid @RequestBody AuthDto.ZauthLoginRequest req) {
+        return ResponseEntity.ok(authService.zauthLogin(req.getZauthId(), req.getPassword()));
     }
 
-    /** POST /api/auth/signup — 회원가입 추가 정보 제출 */
-    @PostMapping("/signup")
-    public ResponseEntity<?> signup(
+    /** POST /api/auth/setup — 최초 로그인 셋업 (성별 저장) */
+    @PostMapping("/setup")
+    public ResponseEntity<?> setup(
             @AuthenticationPrincipal User user,
-            @Valid @RequestBody AuthDto.SignupRequest req) {
-        return ResponseEntity.ok(authService.signup(user, req));
+            @Valid @RequestBody AuthDto.SetupRequest req) {
+        return ResponseEntity.ok(authService.setup(user, req));
     }
 }

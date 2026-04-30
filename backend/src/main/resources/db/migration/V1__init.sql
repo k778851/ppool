@@ -2,13 +2,11 @@
 
 CREATE TABLE IF NOT EXISTS users (
     id              VARCHAR(36) PRIMARY KEY,
-    kakao_id        VARCHAR(50) UNIQUE NOT NULL,
+    zauth_id        VARCHAR(50) UNIQUE NOT NULL,  -- 시온로그인 고유번호
     name            VARCHAR(50) NOT NULL,
     phone           VARCHAR(100),
     department      VARCHAR(100),
-    gender          CHAR(1),
-    account_number  TEXT,
-    account_bank    VARCHAR(50),
+    gender          CHAR(1),                      -- 시온로그인에 없으므로 최초 로그인 시 입력
     is_driver       BOOLEAN NOT NULL DEFAULT FALSE,
     is_admin        BOOLEAN NOT NULL DEFAULT FALSE,
     status          VARCHAR(20) NOT NULL DEFAULT 'PENDING',

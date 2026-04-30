@@ -36,7 +36,6 @@
 | **지도** | 카카오맵 API | |
 | **배포 (Frontend)** | GitHub Pages (`DEPLOY_TARGET=ghpages`) | 정적 export |
 | **배포 (Backend)** | 별도 서버 (환경변수 기반) | |
-| **암호화** | AES-256 (EncryptUtil.java) | 계좌번호 암호화 |
 | **폰트** | Pretendard (본문), Gaegu (히어로 강조) | |
 
 ---
@@ -80,7 +79,7 @@ ppool/
     ├── security/       JwtProvider, JwtAuthFilter, SecurityConfig
     ├── config/         WebConfig (CORS)
     ├── exception/      GlobalExceptionHandler
-    └── util/           EncryptUtil (AES-256)
+    └── util/           (암호화 유틸 불필요 — 계좌 미보관)
 ```
 
 ---
@@ -143,8 +142,6 @@ interface User {
   department: string         // zauth에서 수신
   phone?: string             // zauth에서 수신 (있을 경우)
   gender: 'M' | 'F' | 'N'  // 최초 로그인 시 직접 입력 ★
-  account_number?: string    // AES-256 암호화 저장
-  account_bank?: string
   is_driver: boolean
   is_admin: boolean
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'BANNED'
@@ -305,9 +302,7 @@ CREATE TABLE users (
   name            VARCHAR(50) NOT NULL,
   phone           VARCHAR(100),
   department      VARCHAR(100),
-  gender          CHAR(1),                      -- ★ 최초 로그인 시 입력
-  account_number  TEXT,                         -- AES-256 암호화
-  account_bank    VARCHAR(50),
+  gender          CHAR(1),                      -- ★ 최초 로그인 시 입력 (시온로그인에 없음)
   is_driver       BOOLEAN NOT NULL DEFAULT FALSE,
   is_admin        BOOLEAN NOT NULL DEFAULT FALSE,
   status          VARCHAR(20) NOT NULL DEFAULT 'PENDING',
@@ -377,7 +372,6 @@ CREATE TABLE vehicles (
 | 🟡 MED | 전체 API 연동 | mock → real API (IS_MOCK 해제) |
 | 🟡 MED | 노쇼 정책 자동 처리 | RideRequestService 로직 검증 |
 | 🟡 MED | 출발 자동 취소 스케줄러 | RideService @Scheduled 검증 |
-| 🟡 MED | 계좌번호 암호화 키 관리 | 환경변수 ENCRYPT_KEY (32바이트) |
 | 🟢 LOW | 약관 페이지 내용 채우기 | `/terms`, `/privacy`, `/location-terms` |
 | 🟢 LOW | 실시간 알림 | Web Push (Service Worker) — 2차 |
 | 🟢 LOW | PWA 설정 | manifest.json, Service Worker |

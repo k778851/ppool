@@ -6,7 +6,6 @@ import com.ppool.entity.User;
 import com.ppool.entity.Vehicle;
 import com.ppool.repository.UserRepository;
 import com.ppool.repository.VehicleRepository;
-import com.ppool.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,17 +16,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final VehicleRepository vehicleRepository;
-    private final EncryptUtil encryptUtil;
 
     @Transactional
     public UserDto.Response updateMe(User user, UserDto.UpdateRequest req) {
         if (req.getName() != null) user.setName(req.getName());
         if (req.getDepartment() != null) user.setDepartment(req.getDepartment());
         if (req.getPhone() != null) user.setPhone(req.getPhone());
-        if (req.getAccountNumber() != null) {
-            user.setAccountNumber(encryptUtil.encrypt(req.getAccountNumber()));
-        }
-        if (req.getAccountBank() != null) user.setAccountBank(req.getAccountBank());
         return UserDto.Response.from(userRepository.save(user));
     }
 

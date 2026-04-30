@@ -12,7 +12,6 @@ public class UserDto {
         private String department;
         private String phone;
         private User.Gender gender;
-        private String accountBank;
         private boolean isDriver;
         private boolean isAdmin;
         private User.UserStatus status;
@@ -25,7 +24,6 @@ public class UserDto {
             dto.setDepartment(user.getDepartment());
             dto.setPhone(user.getPhone());
             dto.setGender(user.getGender());
-            dto.setAccountBank(user.getAccountBank());
             dto.setDriver(user.isDriver());
             dto.setAdmin(user.isAdmin());
             dto.setStatus(user.getStatus());
@@ -39,7 +37,5 @@ public class UserDto {
         private String name;
         private String department;
         private String phone;
-        private String accountNumber;
-        private String accountBank;
     }
 }

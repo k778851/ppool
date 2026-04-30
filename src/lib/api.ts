@@ -50,13 +50,6 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 }
 
 // ── 요청/응답 타입 ─────────────────────────────────────────
-export interface SignupRequest {
-  name: string
-  department: string
-  phone: string
-  gender: 'M' | 'F' | 'N'
-}
-
 export interface RideCreateRequest {
   origin: string
   origin_lat: number
@@ -88,13 +81,13 @@ export const api = {
 
   // 인증
   auth: {
-    /** 카카오 인가코드로 JWT 발급 */
-    kakaoCallback: (code: string) =>
-      request<{ token: string; user: User }>('POST', '/auth/kakao', { code }),
+    /** 시온로그인 고유번호+비밀번호 → JWT 발급 */
+    zauthLogin: (zauthId: string, password: string) =>
+      request<{ token: string; user: User }>('POST', '/auth/zauth', { zauthId, password }),
 
-    /** 회원가입 정보 제출 (신규 카카오 유저) */
-    signup: (data: SignupRequest) =>
-      request<User>('POST', '/auth/signup', data),
+    /** 최초 로그인 셋업: 성별 저장 */
+    setup: (gender: 'M' | 'F' | 'N') =>
+      request<User>('POST', '/auth/setup', { gender }),
   },
 
   // 유저
@@ -103,7 +96,7 @@ export const api = {
     me: () => request<User>('GET', '/users/me'),
 
     /** 내 정보 수정 */
-    updateMe: (data: Partial<Pick<User, 'name' | 'department' | 'phone' | 'account_number' | 'account_bank'>>) =>
+    updateMe: (data: Partial<Pick<User, 'name' | 'department' | 'phone'>>) =>
       request<User>('PATCH', '/users/me', data),
 
     /** 차량 등록 */
