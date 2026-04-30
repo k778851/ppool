@@ -50,6 +50,15 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 }
 
 // ── 요청/응답 타입 ─────────────────────────────────────────
+export interface VehicleCreateRequest {
+  plateNumber: string
+  carModel?: string
+  maxSeats: number
+  insuranceConfirmed: boolean
+  licenseConfirmed: boolean
+  nonCommercialConfirmed: boolean
+}
+
 export interface RideCreateRequest {
   origin: string
   origin_lat: number
@@ -100,7 +109,7 @@ export const api = {
       request<User>('PATCH', '/users/me', data),
 
     /** 차량 등록 */
-    addVehicle: (data: Omit<Vehicle, 'id' | 'user_id'>) =>
+    addVehicle: (data: VehicleCreateRequest) =>
       request<Vehicle>('POST', '/users/me/vehicle', data),
   },
 

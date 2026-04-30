@@ -7,7 +7,7 @@ export const IS_MOCK =
 // ── 현재 로그인 유저 (나) ──────────────────────────────────
 export const MOCK_USER: User = {
   id: 'user-001',
-  kakao_id: 'kakao-001',
+  zauth_id: 'kakao-001',
   name: '김지파',
   phone: '010-1234-5678',
   department: '청년1부',
@@ -32,19 +32,19 @@ export const MOCK_VEHICLE: Vehicle = {
 
 // ── 다른 유저들 ───────────────────────────────────────────
 const USER_2: User = {
-  id: 'user-002', kakao_id: 'kakao-002', name: '박청년',
+  id: 'user-002', zauth_id: 'kakao-002', name: '박청년',
   phone: '010-2345-6789', department: '청년2부', gender: 'M',
   is_driver: true, is_admin: false, status: 'APPROVED',
   no_show_count: 0, report_count: 0, created_at: '2026-01-01T00:00:00Z',
 }
 const USER_3: User = {
-  id: 'user-003', kakao_id: 'kakao-003', name: '이여름',
+  id: 'user-003', zauth_id: 'kakao-003', name: '이여름',
   phone: '010-3456-7890', department: '청년3부', gender: 'F',
   is_driver: true, is_admin: false, status: 'APPROVED',
   no_show_count: 0, report_count: 0, created_at: '2026-01-01T00:00:00Z',
 }
 const USER_4: User = {
-  id: 'user-004', kakao_id: 'kakao-004', name: '최봉사',
+  id: 'user-004', zauth_id: 'kakao-004', name: '최봉사',
   phone: '010-4567-8901', department: '청년4부', gender: 'M',
   is_driver: true, is_admin: false, status: 'APPROVED',
   no_show_count: 0, report_count: 0, created_at: '2026-01-01T00:00:00Z',

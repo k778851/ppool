@@ -7,11 +7,11 @@ export type ReportReason = 'NO_SHOW' | 'RUDE' | 'UNSAFE' | 'FARE' | 'OTHER'
 
 export interface User {
   id: string
-  kakao_id: string
+  zauth_id: string
   name: string
   phone: string
   department: string
-  gender: Gender
+  gender: Gender | null   // null = 최초 로그인 후 /setup 미완료 상태
   is_driver: boolean
   is_admin: boolean
   status: UserStatus
