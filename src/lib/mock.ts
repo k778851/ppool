@@ -53,14 +53,17 @@ const USER_4: User = {
 const h = (n: number) => new Date(Date.now() + n * 3_600_000).toISOString()
 
 // ── 카풀 게시글 ───────────────────────────────────────────
-// ride-001: 내가 APPROVED 신청자로 있는 게시글
-// ride-002: 내 게시글 (운전자)
-// ride-003: FULL 게시글, 신청 없음
-// ride-004: 내가 PENDING 신청자로 있는 게시글
-// ride-005: 신청 없음, 신청 가능
+// ride-001: 내가 APPROVED 신청자로 있는 카풀 게시글
+// ride-002: 내 카풀 게시글 (운전자)
+// ride-003: FULL 카풀, 신청 없음
+// ride-004: 내가 PENDING 신청자로 있는 카풀
+// ride-005: 신청 가능한 카풀
+// ride-006: 내가 모집자인 택시합승 게시글
+// ride-007: 신청 가능한 택시합승
 export const MOCK_RIDES: (Ride & { driver?: User; vehicle?: Vehicle })[] = [
   {
     id: 'ride-001',
+    ride_type: 'CARPOOL',
     driver_id: 'user-002', vehicle_id: 'vehicle-002',
     origin: '광주 동구 금남로', origin_lat: 35.1468, origin_lng: 126.9184,
     destination: '서울 강남구 역삼동', destination_lat: 37.5012, destination_lng: 127.0396,
@@ -72,6 +75,7 @@ export const MOCK_RIDES: (Ride & { driver?: User; vehicle?: Vehicle })[] = [
   },
   {
     id: 'ride-002',
+    ride_type: 'CARPOOL',
     driver_id: 'user-001', vehicle_id: 'vehicle-001',
     origin: '서울 강남구 삼성동', origin_lat: 37.5140, origin_lng: 127.0568,
     destination: '광주 북구 운암동', destination_lat: 35.1731, destination_lng: 126.8881,
@@ -81,6 +85,7 @@ export const MOCK_RIDES: (Ride & { driver?: User; vehicle?: Vehicle })[] = [
   },
   {
     id: 'ride-003',
+    ride_type: 'CARPOOL',
     driver_id: 'user-003', vehicle_id: 'vehicle-003',
     origin: '광주 서구 치평동', origin_lat: 35.1528, origin_lng: 126.8509,
     destination: '서울 마포구 홍대입구', destination_lat: 37.5571, destination_lng: 126.9241,
@@ -91,6 +96,7 @@ export const MOCK_RIDES: (Ride & { driver?: User; vehicle?: Vehicle })[] = [
   },
   {
     id: 'ride-004',
+    ride_type: 'CARPOOL',
     driver_id: 'user-004', vehicle_id: 'vehicle-004',
     origin: '광주 남구 봉선동', origin_lat: 35.1269, origin_lng: 126.9152,
     destination: '서울 송파구 잠실동', destination_lat: 37.5133, destination_lng: 127.1000,
@@ -102,6 +108,7 @@ export const MOCK_RIDES: (Ride & { driver?: User; vehicle?: Vehicle })[] = [
   },
   {
     id: 'ride-005',
+    ride_type: 'CARPOOL',
     driver_id: 'user-002', vehicle_id: 'vehicle-002',
     origin: '광주 광산구 수완동', origin_lat: 35.1916, origin_lng: 126.8132,
     destination: '서울 서초구 방배동', destination_lat: 37.4815, destination_lng: 126.9969,
@@ -109,6 +116,29 @@ export const MOCK_RIDES: (Ride & { driver?: User; vehicle?: Vehicle })[] = [
     fare_per_person: 3000, status: 'OPEN', gender_preference: 'ANY',
     created_at: h(-0.2), driver: USER_2,
     vehicle: { id: 'vehicle-002', user_id: 'user-002', car_number: '34나 5678', car_model: '쏘렌토', max_passengers: 4, insurance_confirmed: true },
+  },
+  // ── 택시합승 ──────────────────────────────────────────────
+  {
+    id: 'ride-006',
+    ride_type: 'TAXI',
+    driver_id: 'user-001', vehicle_id: null,  // 내가 모집자
+    origin: '서울 강남구 삼성역 5번 출구', origin_lat: 37.5088, origin_lng: 127.0630,
+    destination: '광주 북구 교회', destination_lat: 35.1600, destination_lng: 126.8500,
+    departure_time: h(3), max_seats: 3, current_seats: 1,
+    fare_per_person: 15000, status: 'OPEN', gender_preference: 'ANY',
+    notice: '인원 채우면 바로 출발해요! 예상 택시비 인당 15,000원.',
+    created_at: h(-0.3), driver: MOCK_USER, vehicle: undefined,
+  },
+  {
+    id: 'ride-007',
+    ride_type: 'TAXI',
+    driver_id: 'user-003', vehicle_id: null,
+    origin: '광주 동구 금남로 지하철역', origin_lat: 35.1468, origin_lng: 126.9184,
+    destination: '서울 서초구 교회 수련원', destination_lat: 37.4900, destination_lng: 127.0200,
+    departure_time: h(36), max_seats: 4, current_seats: 1,
+    fare_per_person: 0, status: 'OPEN', gender_preference: 'SAME_ONLY',
+    notice: '동성끼리 편하게 택시 타요. 택시비 현장 N빵.',
+    created_at: h(-1), driver: USER_3, vehicle: undefined,
   },
 ]
 

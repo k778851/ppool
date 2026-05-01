@@ -60,6 +60,7 @@ export interface VehicleCreateRequest {
 }
 
 export interface RideCreateRequest {
+  rideType: 'CARPOOL' | 'TAXI'
   origin: string
   origin_lat: number
   origin_lng: number
@@ -68,6 +69,7 @@ export interface RideCreateRequest {
   destination_lng: number
   departure_time: string
   max_seats: number
+  fare_per_person?: number    // TAXI: 예상 인당 금액 (0 = N빵), CARPOOL: 생략(서버에서 3000 고정)
   gender_preference: 'ANY' | 'SAME_ONLY'
   notice?: string
 }

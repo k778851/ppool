@@ -12,10 +12,23 @@ interface Props {
 
 export function RideCard({ ride, isMyRide = false, myRequestStatus = null }: Props) {
   const router = useRouter()
+  const isTaxi = ride.ride_type === 'TAXI'
   const isFull = ride.status === 'FULL' || ride.current_seats >= ride.max_seats
   const remaining = ride.max_seats - ride.current_seats
-  const accentColor = isMyRide ? 'var(--blue-hero)' : 'var(--driver)'
-  const avatarBg = ride.driver?.gender === 'F' ? 'var(--rider-soft)' : 'var(--driver-soft)'
+
+  // 색상: 카풀=주황, 택시=보라, 내 게시글=파랑
+  const accentColor = isMyRide
+    ? 'var(--blue-hero)'
+    : isTaxi
+      ? '#8B5CF6'
+      : 'var(--driver)'
+
+  const avatarBg = ride.driver?.gender === 'F' ? 'var(--rider-soft)' : isTaxi ? '#F3EEFF' : 'var(--driver-soft)'
+
+  // 분담금 표시
+  const fareLabel = isTaxi
+    ? (ride.fare_per_person > 0 ? `≈₩${ride.fare_per_person.toLocaleString()}` : 'N빵')
+    : `₩${ride.fare_per_person.toLocaleString()}`
 
   return (
     <div
@@ -31,8 +44,10 @@ export function RideCard({ ride, isMyRide = false, myRequestStatus = null }: Pro
           <div className="post-card-badges">
             {isMyRide ? (
               <span className="post-badge post-badge--my">내 게시글</span>
+            ) : isTaxi ? (
+              <span className="post-badge" style={{ background: '#F3EEFF', color: '#7C3AED' }}>🚕 택시합승</span>
             ) : (
-              <span className="post-badge post-badge--driver">🚗 운전자</span>
+              <span className="post-badge post-badge--driver">🚗 카풀</span>
             )}
             {ride.gender_preference === 'SAME_ONLY' && (
               <span className="post-badge post-badge--neutral">동성만</span>
@@ -66,7 +81,7 @@ export function RideCard({ ride, isMyRide = false, myRequestStatus = null }: Pro
             </div>
           </div>
 
-          {/* 신청 버튼 */}
+          {/* 신청/상태 버튼 */}
           <div onClick={e => { e.stopPropagation(); router.push(`/rides/${ride.id}`) }}>
             {isMyRide ? (
               <span style={{
@@ -110,17 +125,19 @@ export function RideCard({ ride, isMyRide = false, myRequestStatus = null }: Pro
         {/* 하단 */}
         <div className="post-footer">
           <div className="post-avatar-row">
-            <div
-              className="post-avatar"
-              style={{ background: avatarBg }}
-            >
+            <div className="post-avatar" style={{ background: avatarBg }}>
               {ride.driver?.name?.charAt(0) ?? '?'}
             </div>
             <div>
-              <div className="post-user-name">{ride.driver?.name}</div>
+              <div className="post-user-name">
+                {ride.driver?.name}
+                <span style={{ marginLeft: 4, fontSize: 10.5, fontWeight: 600, color: 'var(--ink-40)' }}>
+                  {isTaxi ? '모집자' : '운전자'}
+                </span>
+              </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
                 <span className="post-user-dept">{ride.driver?.department}</span>
-                {ride.driver?.gender && (
+                {ride.driver?.gender && ride.driver.gender !== 'N' && (
                   <span style={{
                     fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 999,
                     background: ride.driver.gender === 'F' ? '#FFE4EF' : '#E4EEFF',
@@ -134,14 +151,17 @@ export function RideCard({ ride, isMyRide = false, myRequestStatus = null }: Pro
           </div>
 
           <div className="post-right">
-            {isFull ? (
-              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-40)' }}>마감</span>
-            ) : (
-              <span className="post-seats">
-                <span style={{ color: accentColor, fontWeight: 800 }}>{remaining}</span>
-                <span style={{ color: 'var(--ink-40)' }}>/{ride.max_seats}석</span>
-              </span>
-            )}
+            <div style={{ textAlign: 'right' }}>
+              {isFull ? (
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-40)' }}>마감</span>
+              ) : (
+                <span className="post-seats">
+                  <span style={{ color: accentColor, fontWeight: 800 }}>{remaining}</span>
+                  <span style={{ color: 'var(--ink-40)' }}>/{ride.max_seats}석</span>
+                </span>
+              )}
+              <div style={{ fontSize: 11, color: 'var(--ink-40)', marginTop: 2 }}>{fareLabel}</div>
+            </div>
           </div>
         </div>
       </div>

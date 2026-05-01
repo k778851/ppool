@@ -30,12 +30,16 @@ public class RideDto {
         private int maxSeats;
 
         private Ride.GenderPreference genderPreference = Ride.GenderPreference.ANY;
+        private Ride.RideType rideType = Ride.RideType.CARPOOL;
+        /** TAXI 타입의 예상 인당 금액 (0 = 현장 N빵). CARPOOL은 서버에서 3000 고정. */
+        private Integer farePerPerson;
         private String notice;
     }
 
     @Data
     public static class Response {
         private String id;
+        private Ride.RideType rideType;
         private UserDto.Response driver;
         private String origin;
         private Double originLat;
@@ -55,6 +59,7 @@ public class RideDto {
         public static Response from(Ride ride, int approvedCount) {
             Response dto = new Response();
             dto.setId(ride.getId());
+            dto.setRideType(ride.getRideType());
             dto.setDriver(UserDto.Response.from(ride.getDriver()));
             dto.setOrigin(ride.getOrigin());
             dto.setOriginLat(ride.getOriginLat());

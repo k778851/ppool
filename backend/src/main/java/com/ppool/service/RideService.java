@@ -43,10 +43,9 @@ public class RideService {
     }
 
     @Transactional
-    public RideDto.Response createRide(User driver, RideDto.CreateRequest req) {
-        if (!driver.isDriver()) {
-            throw new IllegalStateException("운전자 등록이 필요합니다.");
-        }
+    public RideDto.Response createRide(User organizer, RideDto.CreateRequest req) {
+        Ride.RideType rideType = req.getRideType() != null ? req.getRideType() : Ride.RideType.CARPOOL;
+
         // 출발 시각 제약: 현재 시각 +10분 이상, +7일 이내
         LocalDateTime now = LocalDateTime.now();
         if (req.getDepartureTime().isBefore(now.plusMinutes(10))) {
@@ -56,12 +55,26 @@ public class RideService {
             throw new IllegalArgumentException("출발 시각은 7일 이내여야 합니다.");
         }
 
-        Vehicle vehicle = vehicleRepository.findByUser(driver)
-                .orElseThrow(() -> new IllegalStateException("차량 정보가 없습니다."));
+        Vehicle vehicle = null;
+        int farePerPerson;
+
+        if (rideType == Ride.RideType.CARPOOL) {
+            // 카풀: 운전자 등록 필수, 차량 필수, 분담금 3000 고정
+            if (!organizer.isDriver()) {
+                throw new IllegalStateException("카풀 게시글은 운전자 등록이 필요합니다.");
+            }
+            vehicle = vehicleRepository.findByUser(organizer)
+                    .orElseThrow(() -> new IllegalStateException("차량 정보가 없습니다."));
+            farePerPerson = 3000;
+        } else {
+            // 택시합승: 모든 승인 회원 가능, 차량 불필요, 예상 요금 자유 설정 (0 = N빵)
+            farePerPerson = req.getFarePerPerson() != null ? req.getFarePerPerson() : 0;
+        }
 
         Ride ride = Ride.builder()
-                .driver(driver)
+                .driver(organizer)
                 .vehicle(vehicle)
+                .rideType(rideType)
                 .origin(req.getOrigin())
                 .originLat(req.getOriginLat())
                 .originLng(req.getOriginLng())
@@ -70,6 +83,7 @@ public class RideService {
                 .destinationLng(req.getDestinationLng())
                 .departureTime(req.getDepartureTime())
                 .maxSeats(req.getMaxSeats())
+                .farePerPerson(farePerPerson)
                 .genderPreference(req.getGenderPreference() != null ? req.getGenderPreference() : Ride.GenderPreference.ANY)
                 .notice(req.getNotice())
                 .status(Ride.RideStatus.OPEN)

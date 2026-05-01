@@ -6,7 +6,7 @@ import { BottomNav } from '../../../components/layout/BottomNav'
 import { RideCard } from '../../../components/ride/RideCard'
 import { MOCK_RIDES, MOCK_USER } from '../../../lib/mock'
 
-type FilterType = 'all' | 'driver' | 'available' | 'female'
+type FilterType = 'all' | 'carpool' | 'taxi' | 'available' | 'female'
 
 export default function FeedPage() {
   const router = useRouter()
@@ -15,6 +15,8 @@ export default function FeedPage() {
   const filtered = useMemo(() => {
     return MOCK_RIDES.filter(ride => {
       if (ride.status === 'CANCELLED' || ride.status === 'COMPLETED') return false
+      if (activeFilter === 'carpool' && ride.ride_type !== 'CARPOOL') return false
+      if (activeFilter === 'taxi' && ride.ride_type !== 'TAXI') return false
       if (activeFilter === 'available' && (ride.status === 'FULL' || ride.current_seats >= ride.max_seats)) return false
       if (activeFilter === 'female' && ride.gender_preference !== 'SAME_ONLY') return false
       return true
@@ -22,10 +24,11 @@ export default function FeedPage() {
   }, [activeFilter])
 
   const FILTERS: { key: FilterType; label: string; dot?: string }[] = [
-    { key: 'all', label: '전체' },
-    { key: 'driver', label: '운전자', dot: 'var(--driver)' },
+    { key: 'all',       label: '전체' },
+    { key: 'carpool',   label: '🚗 카풀',    dot: 'var(--driver)' },
+    { key: 'taxi',      label: '🚕 택시합승', dot: '#8B5CF6' },
     { key: 'available', label: '잔여석 있는' },
-    { key: 'female', label: '동성매칭' },
+    { key: 'female',    label: '동성매칭' },
   ]
 
   return (
@@ -61,9 +64,13 @@ export default function FeedPage() {
           <div className="hero-sub">오늘 예배, 누구랑 같이 가볼까?</div>
         </div>
 
-        <div className="hero-cta">
-          <button className="hero-cta-btn hero-cta-driver tap"
-            onClick={() => router.push(MOCK_USER.is_driver ? '/rides/new' : '/my/driver')}>
+        {/* CTA: 3개 버튼 */}
+        <div className="hero-cta hero-cta-3">
+          {/* 카풀 운전자 */}
+          <button
+            className="hero-cta-btn hero-cta-driver tap"
+            onClick={() => router.push(MOCK_USER.is_driver ? '/rides/new?type=carpool' : '/my/driver')}
+          >
             <div className="hero-cta-icon-wrap">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M3 14 L3 10 L6 5 L14 5 L17 10 L17 14 M5 14 L5 16 M15 14 L15 16" stroke="#fff" strokeWidth="1.8" strokeLinejoin="round" fill="none" />
@@ -72,12 +79,35 @@ export default function FeedPage() {
               </svg>
             </div>
             <div>
-              <div className="hero-cta-title">태워줄게요</div>
-              <div className="hero-cta-sub">운전자 등록</div>
+              <div className="hero-cta-title">카풀 등록</div>
+              <div className="hero-cta-sub">내 차로 운전</div>
             </div>
           </button>
 
-          <button className="hero-cta-btn hero-cta-rider tap" onClick={() => router.push('/feed')}>
+          {/* 택시합승 */}
+          <button
+            className="hero-cta-btn tap"
+            style={{ background: 'linear-gradient(135deg,#7C3AED,#5B21B6)' }}
+            onClick={() => router.push('/rides/new?type=taxi')}
+          >
+            <div className="hero-cta-icon-wrap">
+              {/* 택시 아이콘 */}
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <rect x="2" y="8" width="16" height="8" rx="3" fill="none" stroke="#fff" strokeWidth="1.7" />
+                <path d="M5 8 L7 4 L13 4 L15 8" stroke="#fff" strokeWidth="1.7" strokeLinejoin="round" fill="none" />
+                <circle cx="5.5" cy="16.5" r="1.5" fill="#fff" />
+                <circle cx="14.5" cy="16.5" r="1.5" fill="#fff" />
+                <rect x="8" y="3" width="4" height="1.5" rx="0.5" fill="#fff" />
+              </svg>
+            </div>
+            <div>
+              <div className="hero-cta-title">택시 모집</div>
+              <div className="hero-cta-sub">같이 택시 타요</div>
+            </div>
+          </button>
+
+          {/* 탑승 신청 */}
+          <button className="hero-cta-btn hero-cta-rider tap" onClick={() => setActiveFilter('available')}>
             <div className="hero-cta-icon-wrap">
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                 <circle cx="9" cy="6" r="3" stroke="#fff" strokeWidth="1.7" fill="none" />
@@ -85,7 +115,7 @@ export default function FeedPage() {
               </svg>
             </div>
             <div>
-              <div className="hero-cta-title">태워주세요</div>
+              <div className="hero-cta-title">탑승 신청</div>
               <div className="hero-cta-sub">탑승자 등록</div>
             </div>
           </button>
@@ -95,9 +125,12 @@ export default function FeedPage() {
       {/* ── 필터 칩 ── */}
       <div className="feed-filter noscroll">
         {FILTERS.map(f => (
-          <button key={f.key} className={`feed-chip tap${activeFilter === f.key ? ' active' : ''}`}
-            onClick={() => setActiveFilter(f.key)}>
-            {f.dot && activeFilter !== f.key && <span className="chip-dot" style={{ background: f.dot }} />}
+          <button
+            key={f.key}
+            className={`feed-chip tap${activeFilter === f.key ? ' active' : ''}`}
+            onClick={() => setActiveFilter(f.key)}
+            style={activeFilter === f.key && f.dot ? { background: f.dot, borderColor: f.dot } : undefined}
+          >
             {f.label}
           </button>
         ))}
@@ -113,7 +146,7 @@ export default function FeedPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 16px 90px' }}>
           {filtered.length === 0 ? (
             <div className="feed-empty">
-              <p>조건에 맞는 카풀이 없습니다.</p>
+              <p>조건에 맞는 게시글이 없습니다.</p>
               <p className="text-muted">필터를 바꿔보거나 직접 게시글을 올려보세요.</p>
             </div>
           ) : (
@@ -122,6 +155,7 @@ export default function FeedPage() {
             ))
           )}
 
+          {/* 안내 카드 */}
           <div className="notice-card">
             <div style={{ flexShrink: 0, width: 44, height: 44, borderRadius: '50%', background: 'rgba(10,30,199,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
@@ -130,12 +164,18 @@ export default function FeedPage() {
               </svg>
             </div>
             <div>
-              <div className="notice-text-main">분담금은 3,000원 정액이에요</div>
-              <div className="notice-text-sub">유류비 분담 목적 · 영리 운송 아님</div>
+              <div className="notice-text-main">카풀 분담금 3,000원 · 택시는 실비 N빵</div>
+              <div className="notice-text-sub">카풀은 유류비 분담 목적 · 영리 운송 아님</div>
             </div>
           </div>
         </div>
       </div>
+
+      <style>{`
+        .hero-cta-3 {
+          grid-template-columns: 1fr 1fr 1fr !important;
+        }
+      `}</style>
 
       <BottomNav />
     </div>

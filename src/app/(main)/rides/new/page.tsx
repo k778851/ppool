@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { BottomNav } from '../../../../components/layout/BottomNav'
+import type { RideType } from '../../../../types'
 
 interface FormState {
   origin: string
@@ -10,6 +11,8 @@ interface FormState {
   date: string
   time: string
   seats: number
+  estimatedFare: string   // 택시합승 예상 요금(인당), '' = 미설정
+  genderPref: 'ANY' | 'SAME_ONLY'
   notice: string
 }
 
@@ -31,42 +34,50 @@ function FieldBox({ label, children }: { label?: string; children: React.ReactNo
   )
 }
 
-function InputCell({ label, value, onChange, type = 'text' }: { label?: string; value: string | number; onChange?: (v: string) => void; type?: string }) {
-  return (
-    <FieldBox label={label}>
-      <div className="write-input-wrap">
-        <input className="write-input" type={type} value={value} onChange={e => onChange?.(e.target.value)} />
-      </div>
-    </FieldBox>
-  )
-}
-
 const now = new Date()
 const pad = (n: number) => String(n).padStart(2, '0')
 const defaultDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
 const defaultTime = `${pad(now.getHours() + 1)}:00`
 
-export default function RideNewPage() {
+function RideNewPageInner() {
   const router = useRouter()
-  const [form, setForm] = useState<FormState>({ origin: '', destination: '', date: defaultDate, time: defaultTime, seats: 3, notice: '' })
-  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
+  const params = useSearchParams()
+
+  // URL ?type=taxi 로 진입 시 택시합승 기본 선택
+  const [rideType, setRideType] = useState<RideType>(
+    params.get('type') === 'taxi' ? 'TAXI' : 'CARPOOL'
+  )
+
+  const [form, setForm] = useState<FormState>({
+    origin: '', destination: '', date: defaultDate, time: defaultTime,
+    seats: rideType === 'TAXI' ? 3 : 3,
+    estimatedFare: '',
+    genderPref: 'ANY',
+    notice: '',
+  })
+  const [errors, setErrors] = useState<Partial<Record<keyof FormState | 'type', string>>>({})
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm(prev => ({ ...prev, [key]: value }))
 
   const swapRoute = () => setForm(p => ({ ...p, origin: p.destination, destination: p.origin }))
 
+  const isTaxi = rideType === 'TAXI'
+  const accentColor = isTaxi ? '#8B5CF6' : 'var(--driver)'
+  const accentSoft = isTaxi ? '#F3EEFF' : 'var(--driver-soft)'
+
   const validate = () => {
     const e: typeof errors = {}
     if (!form.origin.trim()) e.origin = '출발지를 입력해주세요'
     if (!form.destination.trim()) e.destination = '도착지를 입력해주세요'
+    if (form.estimatedFare && isNaN(Number(form.estimatedFare))) e.estimatedFare = '숫자만 입력해주세요'
     setErrors(e)
     return Object.keys(e).length === 0
   }
 
   const handleSubmit = () => {
     if (!validate()) return
-    alert('게시글 등록 완료!\n(백엔드 연결 후 실제 저장 예정)')
+    alert(`${isTaxi ? '택시합승' : '카풀'} 게시글 등록 완료!\n(백엔드 연결 후 실제 저장 예정)`)
     router.push('/feed')
   }
 
@@ -79,12 +90,66 @@ export default function RideNewPage() {
           </svg>
         </button>
         <span className="detail-topbar-title">게시글 등록</span>
-        <button className="btn-ghost" style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-40)' }}>임시저장</button>
+        <div style={{ width: 60 }} />
       </div>
 
       <div className="write-body">
+
+        {/* ── 타입 선택 ── */}
+        <section className="write-section" style={{ paddingBottom: 0 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <button
+              type="button"
+              className="tap"
+              onClick={() => setRideType('CARPOOL')}
+              style={{
+                padding: '14px 8px',
+                borderRadius: 'var(--radius-md)',
+                border: `2px solid ${rideType === 'CARPOOL' ? 'var(--driver)' : 'var(--ink-20)'}`,
+                background: rideType === 'CARPOOL' ? 'var(--driver-soft)' : 'var(--ink-5)',
+                display: 'flex', alignItems: 'center', gap: 10,
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              <span style={{ fontSize: 22 }}>🚗</span>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: rideType === 'CARPOOL' ? 'var(--driver-ink)' : 'var(--ink-60)' }}>카풀</div>
+                <div style={{ fontSize: 11, color: 'var(--ink-40)', marginTop: 1 }}>내 차로 운전</div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              className="tap"
+              onClick={() => setRideType('TAXI')}
+              style={{
+                padding: '14px 8px',
+                borderRadius: 'var(--radius-md)',
+                border: `2px solid ${isTaxi ? '#8B5CF6' : 'var(--ink-20)'}`,
+                background: isTaxi ? '#F3EEFF' : 'var(--ink-5)',
+                display: 'flex', alignItems: 'center', gap: 10,
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              <span style={{ fontSize: 22 }}>🚕</span>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: isTaxi ? '#7C3AED' : 'var(--ink-60)' }}>택시합승</div>
+                <div style={{ fontSize: 11, color: 'var(--ink-40)', marginTop: 1 }}>같이 택시 타요</div>
+              </div>
+            </button>
+          </div>
+
+          {/* 타입 안내 */}
+          <div style={{ marginTop: 10, padding: '10px 14px', borderRadius: 'var(--radius-sm)', background: accentSoft, fontSize: 12, color: 'var(--ink-60)', lineHeight: 1.5 }}>
+            {isTaxi
+              ? '🚕 택시합승: 같이 택시 탈 분을 모집해요. 실제 택시 요금을 인원 수로 나눠 정산해요.'
+              : '🚗 카풀: 운전자 등록이 필요합니다. 분담금은 인당 3,000원(유류비 분담)으로 고정돼요.'}
+          </div>
+        </section>
+
+        {/* ── 경로 ── */}
         <section className="write-section">
-          <StepLabel num="1" color="var(--driver)">어디서 → 어디로?</StepLabel>
+          <StepLabel num="1" color={accentColor}>어디서 → 어디로?</StepLabel>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <FieldBox label="출발지">
               <div className="write-input-wrap" style={{ borderColor: errors.origin ? 'var(--warn)' : undefined }}>
@@ -108,17 +173,29 @@ export default function RideNewPage() {
           </div>
         </section>
 
+        {/* ── 출발 시각 ── */}
         <section className="write-section">
-          <StepLabel num="2" color="var(--driver)">언제 출발해요?</StepLabel>
+          <StepLabel num="2" color={accentColor}>언제 출발해요?</StepLabel>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            <InputCell label="날짜" type="date" value={form.date} onChange={v => set('date', v)} />
-            <InputCell label="시간" type="time" value={form.time} onChange={v => set('time', v)} />
+            <FieldBox label="날짜">
+              <div className="write-input-wrap">
+                <input className="write-input" type="date" value={form.date} onChange={e => set('date', e.target.value)} />
+              </div>
+            </FieldBox>
+            <FieldBox label="시간">
+              <div className="write-input-wrap">
+                <input className="write-input" type="time" value={form.time} onChange={e => set('time', e.target.value)} />
+              </div>
+            </FieldBox>
           </div>
         </section>
 
+        {/* ── 인원 ── */}
         <section className="write-section">
-          <StepLabel num="3" color="var(--driver)">몇 명 태울 수 있어요?</StepLabel>
-          <FieldBox label="탑승 인원">
+          <StepLabel num="3" color={accentColor}>
+            {isTaxi ? '몇 명 같이 탈 수 있어요?' : '몇 명 태울 수 있어요?'}
+          </StepLabel>
+          <FieldBox label={isTaxi ? '모집 인원 (본인 제외)' : '탑승 인원 (본인 제외)'}>
             <div className="write-input-wrap write-spinner-wrap">
               <button className="write-spinner-btn tap" onClick={() => set('seats', Math.max(1, form.seats - 1))}>−</button>
               <span className="write-spinner-val">{form.seats} 명</span>
@@ -127,10 +204,68 @@ export default function RideNewPage() {
           </FieldBox>
         </section>
 
+        {/* ── 요금 (택시합승만) ── */}
+        {isTaxi && (
+          <section className="write-section">
+            <StepLabel num="4" color={accentColor}>예상 분담금 <span style={{ fontSize: 12, color: 'var(--ink-40)', fontWeight: 600 }}>(선택)</span></StepLabel>
+            <FieldBox label="인당 예상 금액 (원)">
+              <div className="write-input-wrap">
+                <input
+                  className="write-input"
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="예) 15000 (비워두면 현장 N빵으로 표시)"
+                  value={form.estimatedFare}
+                  onChange={e => set('estimatedFare', e.target.value)}
+                />
+              </div>
+              {errors.estimatedFare && <div className="error">{errors.estimatedFare}</div>}
+            </FieldBox>
+            <div style={{ fontSize: 11.5, color: 'var(--ink-40)', lineHeight: 1.5, marginTop: -4 }}>
+              비워두면 피드에 &apos;N빵&apos;으로 표시됩니다. 실제 정산은 탑승자끼리 직접 해주세요.
+            </div>
+          </section>
+        )}
+
+        {/* ── 성별 매칭 ── */}
         <section className="write-section">
-          <StepLabel num="4" color="var(--driver)">하고 싶은 말 <span style={{ fontSize: 12, color: 'var(--ink-40)', fontWeight: 600 }}>(선택)</span></StepLabel>
+          <StepLabel num={isTaxi ? '5' : '4'} color={accentColor}>성별 매칭</StepLabel>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {(['ANY', 'SAME_ONLY'] as const).map(v => (
+              <button
+                key={v}
+                type="button"
+                className="tap"
+                onClick={() => set('genderPref', v)}
+                style={{
+                  padding: '12px 8px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: `1.5px solid ${form.genderPref === v ? accentColor : 'var(--ink-20)'}`,
+                  background: form.genderPref === v ? accentSoft : 'var(--ink-5)',
+                  fontSize: 13, fontWeight: 700,
+                  color: form.genderPref === v ? accentColor : 'var(--ink-60)',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >
+                {v === 'ANY' ? '성별 무관' : '동성만'}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* ── 메모 ── */}
+        <section className="write-section">
+          <StepLabel num={isTaxi ? '6' : '5'} color={accentColor}>
+            하고 싶은 말 <span style={{ fontSize: 12, color: 'var(--ink-40)', fontWeight: 600 }}>(선택)</span>
+          </StepLabel>
           <div style={{ position: 'relative' }}>
-            <textarea className="write-textarea" placeholder="예) 11번 출구 앞에서 기다릴게요." value={form.notice} maxLength={120} onChange={e => set('notice', e.target.value)} />
+            <textarea
+              className="write-textarea"
+              placeholder={isTaxi ? '예) 3명 모이면 바로 콜택시 부를게요!' : '예) 11번 출구 앞에서 기다릴게요.'}
+              value={form.notice}
+              maxLength={120}
+              onChange={e => set('notice', e.target.value)}
+            />
             <div className="write-char-count">{form.notice.length} / 120</div>
           </div>
         </section>
@@ -139,10 +274,24 @@ export default function RideNewPage() {
       </div>
 
       <div className="write-bottom-cta">
-        <button className="detail-cta-primary tap" style={{ background: 'var(--driver)' }} onClick={handleSubmit}>등록하기</button>
+        <button
+          className="detail-cta-primary tap"
+          style={{ background: accentColor }}
+          onClick={handleSubmit}
+        >
+          {isTaxi ? '🚕 택시합승 모집 등록' : '🚗 카풀 등록하기'}
+        </button>
       </div>
 
       <BottomNav />
     </div>
+  )
+}
+
+export default function RideNewPage() {
+  return (
+    <Suspense>
+      <RideNewPageInner />
+    </Suspense>
   )
 }

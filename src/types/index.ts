@@ -1,5 +1,6 @@
 export type UserStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'BANNED'
 export type Gender = 'M' | 'F' | 'N'
+export type RideType = 'CARPOOL' | 'TAXI'
 export type RideStatus = 'OPEN' | 'FULL' | 'STARTED' | 'COMPLETED' | 'CANCELLED'
 export type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'NO_SHOW' | 'COMPLETED'
 export type GenderPreference = 'ANY' | 'SAME_ONLY'
@@ -33,8 +34,9 @@ export interface Vehicle {
 
 export interface Ride {
   id: string
-  driver_id: string
-  vehicle_id: string
+  ride_type: RideType          // CARPOOL | TAXI
+  driver_id: string            // 카풀 운전자 또는 택시합승 모집자
+  vehicle_id: string | null    // TAXI 타입은 null
   origin: string
   origin_lat: number
   origin_lng: number
@@ -45,7 +47,7 @@ export interface Ride {
   departure_time: string
   max_seats: number
   current_seats: number
-  fare_per_person: number
+  fare_per_person: number      // CARPOOL=3000 고정 / TAXI=예상 택시비 n분의 1 (0=미설정)
   status: RideStatus
   gender_preference: GenderPreference
   notice?: string
